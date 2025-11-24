@@ -1,0 +1,22 @@
+{
+  "name": "gate-brand-upgrade-min",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cobe": "^0.6.5",
+    "ogl": "^1.0.11",
+    "vue": "^3.4.27",
+    "vue-router": "^4.3.2",
+    "vue-use-spring": "^0.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "vite": "^5.4.8"
+  }
+}

@@ -1,0 +1,382 @@
+/* Fonts */
+@font-face {
+  font-family: "Aeonik-Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/font/Aeonik-Regular.woff2") format("woff2"),
+       url("../assets/font/Aeonik-Regular.woff") format("woff"),
+       url("../assets/font/Aeonik-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Aeonik-Medium";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/font/Aeonik-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Aeonik-Light";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("../assets/font/Aeonik-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Aeonik-Bold";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/font/Aeonik-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Parabole";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/font/parabole-bolddisplay.ttf") format("truetype");
+}
+
+/* Base reset */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  line-height: var(--line-height);
+  color: var(--color-text-base);
+  background: var(--page-bg); /* 全站背景 */
+}
+
+/* 强制标题与导航等关键组件使用 Aeonik-Regular */
+h1, h2, h3, h4, h5, h6,
+.header-bar, .header-col,
+.side-nav, .nav-list, .nav-button, .nav-button .label,
+.content-area { font-family: var(--font-family-base); }
+
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; padding: 0; margin: 0; }
+
+/* Typography utilities（全部走全局变量，方便统一调配） */
+.text-20 { font-size: var(--size-20); line-height: var(--line-height); color: var(--color-text-strong); margin: 0; }
+.text-40 { font-size: var(--size-40); line-height: var(--line-height); color: var(--color-text-strong); margin: 0; }
+.text-70 { font-size: var(--size-70); line-height: var(--line-height); color: var(--color-text-strong); margin: 0; }
+.text-gray { color: var(--color-text-gray); }
+.z1 { font-family: "Aeonik-Light", var(--font-family-base); font-weight: 300; font-size: 50px; line-height: 56px; color: #111111; }
+.z2 { font-family: "Aeonik-Regular", var(--font-family-base); font-weight: 400; font-size: 32px; line-height: 38px; color: #111111; }
+.z3 { font-family: "Aeonik-Regular", var(--font-family-base); font-weight: 400; font-size: 16px; line-height: 26px; color: #111111; }
+.z4 { font-family: "Aeonik-Regular", var(--font-family-base); font-weight: 400; font-size: 16px; line-height: 26px; color: #B2B2B2; }
+.z5 { font-family: "Parabole", var(--font-family-base); font-weight: 700; font-size: 200px; line-height: 160px; color: #000000; }
+
+/* Line-height utilities */
+.lh-display { line-height: var(--line-height-display); }
+
+/* Variables（集中管理：字号/字色/字体/空间） */
+:root {
+  /* 字体族 */
+  --font-family-base: "Aeonik-Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+
+  /* 统一行距与字号 */
+  --line-height: 36px;
+  --line-height-display: 88px; /* 大标题/展示型行距 */
+  --size-20: 20px;
+  --size-40: 40px;
+  --size-70: 70px;
+
+  /* 文字颜色 */
+  --color-text-base: #222;        /* 全站默认文本色 */
+  --color-text-strong: #111111;   /* 标题/正文主色 */
+  --color-text-gray: #B2B2B2;     /* 次级说明色 */
+
+  /* 页面背景与细线 */
+  --page-bg: #F4F4F4;
+  --hairline: #D5D5D5;
+
+  /* 布局与空间 */
+  --container-max: 1240px;
+  --gutter: 24px;
+  --nav-wide: 240px;
+  --content-wide: 1000px;
+  --content-fixed-1420: 1000px;
+  --nav-narrow: 80px;
+  --pad-min: 16px;
+  --pad-pref: 24px;
+  --content-gap: 20px; /* 内容与导航的统一间距 */
+}
+
+/* Hairline helpers (true 1px, adjusted for HiDPI) */
+.hairline-right { border-right: 1px solid var(--hairline); }
+.hairline-bottom { border-bottom: 1px solid var(--hairline); }
+.hairline-top { border-top: 1px solid var(--hairline); }
+.hairline { width: 100%; height: 1px; background: var(--hairline); }
+@media (min-resolution: 2dppx) {
+  .hairline-right { border-right-width: 0.5px; }
+  .hairline-bottom { border-bottom-width: 0.5px; }
+  .hairline-top { border-top-width: 0.5px; }
+}
+
+/* Layout container */
+.app-shell { width: 100%; }
+
+.white-split-active .app-shell {
+  background-image: linear-gradient(var(--page-bg) 0, var(--page-bg) var(--white-start), #FFFFFF var(--white-start), #FFFFFF 100%);
+}
+.white-split-active .side-nav { background: transparent; }
+
+.blue-split-active .app-shell {
+  background-image: linear-gradient(var(--page-bg) 0, var(--page-bg) var(--blue-start), #0055FF var(--blue-start), #0055FF 100%);
+}
+.blue-split-active .side-nav { background: transparent; }
+.blue-split-active .app-shell::before {
+  content: "";
+  position: fixed;
+  /* 修改点 1: 让蓝色背景向上偏移 40px (圆角的大小)，使其垫在黑色圆角下方 */
+  top: calc(var(--blue-start) - var(--scroll-y) - 40px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #0055FF;
+  /* 修改点 2: 删除顶部的圆角，使其变为平角 */
+  /* border-top-left-radius: 40px; */
+  /* border-top-right-radius: 40px; */
+  pointer-events: none;
+  z-index: 60; /* 保持 z-index 低于黑色层的 65 */
+}
+.blue-split-active .content-area { position: relative; z-index: 70; }
+
+.black-split-active .app-shell::after {
+  /* ... */
+  background: #000000;
+  /* 黑色层提供底部的圆角 */
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  pointer-events: none;
+  z-index: 65; /* 确保比蓝色层高 */
+}
+.black-split-active .side-nav { background: transparent; }
+.black-split-active .app-shell::after {
+  content: "";
+  position: fixed;
+  top: calc(var(--black-start) - var(--scroll-y));
+  left: 0;
+  right: 0;
+  height: calc(var(--blue-start) - var(--black-start));
+  background: #000000;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  pointer-events: none;
+  z-index: 65;
+}
+
+/* Header */
+.header-bar {
+  height: 80px;
+  background: #F4F4F4;
+  position: relative;
+  z-index: 10;
+}
+
+.header-grid {
+  width: clamp(1024px, 100vw, var(--container-max));
+  margin: 0 auto;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 240px 1fr 320px;
+}
+.header-col { display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+.header-left { justify-content: center; position: relative; }
+.logo { font-weight: 600; }
+.logo img { display: block; }
+.hamburger-btn { display: none; border: none; background: transparent; font-size: 20px; cursor: pointer; }
+
+/* Main grid base */
+.main-grid {
+  margin: 0 auto;
+  display: grid;
+  align-items: start;
+}
+.side-nav {
+  padding: 16px;
+  background: #F4F4F4;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+}
+.nav-list { display: flex; flex-direction: column; gap: 15px; align-items: flex-end; }
+.nav-list .nav-item { margin: 0; }
+.nav-button { display: flex; align-items: center; width: 150px; height: 40px; border-radius: 6px; background: transparent; padding-left: 15px; text-decoration: none; cursor: pointer; }
+.nav-button:hover { background: #EAEAEA; }
+.nav-button.router-link-active { background: #FFFFFF; }
+.nav-button .label { font-size: 16px; color: #B2B2B2; }
+.nav-button.router-link-active .label { color: #111111; }
+.nav-button .icon { display: none; }
+.icon { width: 20px; height: 20px; display: inline-block; }
+.label { white-space: nowrap; }
+.nav-bottom { margin-top: auto; display: flex; justify-content: center; padding-top: 8px; }
+.download-btn { border: none; background: transparent; cursor: pointer; font-size: 18px; }
+
+.content-area {
+  padding: 16px 0; /* 上下 16，左右 0；左侧与侧栏间距由 column-gap 控制 */
+  word-wrap: break-word;
+  min-width: 0; /* 允许在 Grid/Flex 中收缩避免横向滚动 */
+  overflow-wrap: anywhere; /* 更积极的换行策略以避免溢出 */
+  max-width: var(--content-wide);
+}
+.content-area img { max-width: 100%; height: auto; }
+.page h1 { margin: 0 0 12px; font-size: 24px; }
+.page p { margin: 0; color: var(--color-text-base); line-height: var(--line-height); }
+
+.g1 { height: 120px; }
+.g2 { height: 80px; }
+.g3 { height: 40px; }
+.g4 { height: 20px; }
+
+/* Sticky behavior base */
+.side-nav { position: sticky; top: 80px; align-self: start; }
+
+/* ≥1800 */
+@media (min-width: 1800px) {
+  /* 保持左列参与网格，改为让 logo 自身固定，避免中区被覆盖 */
+  .header-left { position: static; }
+  .logo {
+    position: fixed;
+    top: 0;
+    left: calc(50% - (var(--container-max) / 2));
+    width: var(--nav-wide);
+    height: 80px;
+    background: #F4F4F4;
+    z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline); /* 头部底部细线在 logo 区域内补画，避免被覆盖 */
+  }
+  .header-grid { grid-template-columns: 240px 1fr 320px; }
+  .header-left.hairline-right { border-right-color: var(--hairline); }
+  .header-center.hairline-right { border-right-color: var(--hairline); }
+
+  .main-grid {
+    width: var(--container-max);
+    grid-template-columns: var(--nav-wide) var(--content-wide);
+    column-gap: var(--content-gap); /* 内容与导航间距统一为 20 */
+  }
+  .side-nav { width: var(--nav-wide); }
+  .content-area { max-width: var(--content-wide); }
+}
+
+/* 1500–1799：对向收紧 */
+@media (min-width: 1500px) and (max-width: 1799px) {
+  .header-grid { grid-template-columns: 240px 1fr 320px; }
+  .header-center.hairline-right { border-right-color: var(--hairline); }
+
+  .main-grid {
+    width: 100vw;
+    grid-template-columns: var(--nav-wide) min(var(--content-wide), calc(100vw - var(--nav-wide) - var(--content-gap)));
+    column-gap: var(--content-gap);
+  }
+  .side-nav { width: var(--nav-wide); }
+  .content-area { max-width: var(--content-wide); }
+}
+
+/* 1420–1499：隐藏头部右栏；导航改 80px；内容 1420 版心并继续缩 */
+@media (min-width: 1420px) and (max-width: 1499px) {
+  .header-grid { grid-template-columns: 240px 1fr; }
+  .header-right { display: none; }
+  .header-center { border-right: none; } /* 不画右侧竖线 */
+
+  .main-grid {
+    width: 100vw;
+    grid-template-columns: var(--nav-wide) 1fr;
+    column-gap: var(--content-gap);
+  }
+  .side-nav { width: var(--nav-wide); }
+  .content-area { max-width: var(--content-fixed-1420); }
+}
+
+/* 1024–1419：两列头部（左300+右自适应）；导航80；内容继续缩，左右最小内边距 ≥16–24px */
+@media (min-width: 1024px) and (max-width: 1419px) {
+  .header-grid { grid-template-columns: 240px 1fr; }
+  .header-right { display: none; }
+  .header-center.hairline-right { border-right-color: var(--hairline); } /* 中间竖线保留 */
+
+  .main-grid {
+    width: 100vw;
+    grid-template-columns: var(--nav-wide) 1fr;
+    column-gap: var(--content-gap);
+  }
+  .side-nav { width: var(--nav-wide); }
+  .content-area {
+    padding-left: 0; /* 左侧与侧栏间距由 column-gap 控制为 20 */
+    padding-right: 0;
+  }
+}
+
+/* ≤1024：隐藏头部右区，保持两列头部布局；不进入 hamburger（仅 ≤800 进入） */
+@media (max-width: 1023px) {
+  .header-grid { grid-template-columns: 240px 1fr; }
+  .header-right { display: none; }
+  .header-center.hairline-right { border-right-color: var(--hairline); }
+}
+
+/* ≤800：出现 hamburger；隐藏侧栏，菜单承载导航与下载入口 */
+@media (max-width: 799px) {
+  .header-grid { grid-template-columns: 240px 1fr; width: 100vw; }
+  .header-right { display: none; }
+  .header-center.hairline-right { border-right-color: var(--hairline); }
+  .hamburger-btn { display: inline-block; position: absolute; left: 12px; }
+
+  .side-nav { display: none; }
+  .main-grid { width: 100vw; grid-template-columns: 1fr; }
+  .content-area { padding-left: var(--content-gap); }
+
+  .mobile-menu {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: #F4F4F4;
+    border-top: 1px solid var(--hairline);
+    padding: 12px 16px;
+    z-index: 50;
+  }
+@media (min-resolution: 2dppx) {
+  .mobile-menu { border-top-width: 0.5px; }
+}
+.mobile-menu-list { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.menu-download { border: 1px solid var(--hairline); background: #F4F4F4; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+@media (min-resolution: 2dppx) {
+  .menu-download { border-width: 0.5px; }
+}
+
+/* 高分屏下保证 logo 右侧分隔线为真 1px */
+@media (min-resolution: 2dppx) {
+  .logo { border-right-width: 0.5px; }
+}
+}
+
+/* 自定义 1300 断点规则：>1300 文本按钮（150×40，右侧 80px）；≤1300 图标按钮（50×40，右侧 15px） */
+/* 默认按 >1300 配置：右侧 80px，文本-only，150×40 */
+.side-nav { padding-right: 80px; }
+
+@media (max-width: 1299px) {
+  .side-nav { padding-right: 15px; }
+  .nav-button { width: 50px; height: 40px; justify-content: center; padding-left: 0; }
+  .nav-button .label { display: none; }
+  .nav-button .icon { display: inline-block; }
+}
+
+/* 800–1299：侧栏宽 80px，主栅格调整为 80 + 内容；≤800 不使用两列 */
+@media (min-width: 800px) and (max-width: 1299px) {
+  .main-grid { grid-template-columns: var(--nav-narrow) 1fr; column-gap: var(--content-gap); }
+  .side-nav { width: var(--nav-narrow); }
+}
+
+/* 高分屏下保证 logo 底部细线为真 1px */
+@media (min-resolution: 2dppx) {
+  .logo { border-bottom-width: 0.5px; }
+}
+
+/* ≥800 时仅右侧对齐与 80px padding 生效；≤800 切换至 hamburger（见上方规则） */
