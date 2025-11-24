@@ -189,7 +189,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/3.png" alt="3.png" />
+    <img class="image-1000" src="../assets/color/3.png" alt="3.png" />
     
     <div class="g2" aria-hidden="true"></div>
 
@@ -197,7 +197,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/4.png" alt="4.png" />
+    <img class="image-1000" src="../assets/color/4.png" alt="4.png" />
 
     <div class="g1" aria-hidden="true"></div>
 
@@ -209,7 +209,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/5.png" alt="5.png" />
+    <img class="image-1000" src="../assets/color/5.png" alt="5.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -221,7 +221,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/6.png" alt="6.png" />
+    <img class="image-1000" src="../assets/color/6.png" alt="6.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -239,7 +239,7 @@
    
     <div class="g4" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/7.png" alt="7.png" />
+    <img class="image-1000" src="../assets/color/7.png" alt="7.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -247,7 +247,7 @@
 
     <div class="g4" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/8.png" alt="8.png" />
+    <img class="image-1000" src="../assets/color/8.png" alt="8.png" />
 
     <div class="g1
     " aria-hidden="true"></div>
@@ -256,7 +256,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/9.png" alt="9.png" />
+    <img class="image-1000" src="../assets/color/9.png" alt="9.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -264,7 +264,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/10.png" alt="10.png" />
+    <img class="image-1000" src="../assets/color/10.png" alt="10.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -272,7 +272,7 @@
 
     <div class="g2" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/11.png" alt="11.png" />
+    <img class="image-1000" src="../assets/color/11.png" alt="11.png" />
 
     <div class="g4" aria-hidden="true"></div>
 
@@ -286,7 +286,7 @@
 
     <div class="g2" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/12.png" alt="12.png" />
+    <img class="image-1000" src="../assets/color/12.png" alt="12.png" />
 
     <div class="g2" aria-hidden="true"></div>
 
@@ -300,7 +300,7 @@
 
     <div class="g3" aria-hidden="true"></div>
 
-    <img class="image-1000" src="../assets/Color/13.png" alt="13.png" />
+    <img class="image-1000" src="../assets/color/13.png" alt="13.png" />
 
     <div class="g1" aria-hidden="true"></div>
 
