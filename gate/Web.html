@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>GATE 网页端演示</title>
+  <style>
+    :root { --header-h: 0px; }
+    html, body { margin: 0; padding: 0; overflow-x: hidden; }
+
+    /* 顶部吸顶：左右两张图片 */
+    .gate-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100vw;
+      height: 50px;
+      z-index: 1000;
+      background-color: #070808;
+      display: flex;
+      justify-content: space-between;
+    }
+    .gate-header-left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 50px;
+      z-index: 1001;
+    }
+    .gate-header-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 50px;
+      z-index: 1001;
+    }
+    .gate-header img { height: 50px; width: auto; display: block; cursor: pointer; }
+    
+    /* 响应式：通过JavaScript控制右侧图片显示/隐藏 */
+    .gate-header-right.hidden {
+      display: none;
+    }
+
+    /* 页面容器，固定宽度 1200px，居中 */
+    .gate-page {
+      width: 1200px;
+      margin: 0 auto;
+      padding-top: var(--header-h); /* 为避免内容被吸顶遮挡 */
+    }
+
+    /* 区块内图片自适应 */
+    .gate-page img { width: 100%; height: auto; display: block; }
+
+    /* 左对齐区块（在 1200px 宽度内即可左对齐） */
+    .left-align { text-align: left; }
+
+    /* 全宽区域（超出 1200px） */
+    .full-bleed {
+      width: 100vw;
+      margin: 0; padding: 0;
+      padding-bottom: 80px; /* 距离底部 80px */
+      /* 放在容器外，不需要偏移技巧 */
+    }
+    /* 主题背景色 */
+    body[data-theme='dark'] { background-color: #070808; }
+    body[data-theme='light'] { background-color: #ffffff; }
+    
+    body[data-theme='dark'] .full-bleed { background: #131516; }
+    body[data-theme='light'] .full-bleed { background: #FAFAFA; }
+
+    .full-bleed-inner {
+      width: 1200px; /* 底部图片也在 1200px 容器内 */
+      margin: 0 auto;
+      padding-top: 80px; /* 距离全宽区域顶部 80px */
+    }
+    .full-bleed-inner img {
+      display: block;
+      width: 100%; /* 在 1200px 容器内占满宽度 */
+      height: auto;
+    }
+
+    /* 全站图片不可拖拽（与之前一致） */
+    img { -webkit-user-drag: none; user-select: none; }
+    a { -webkit-tap-highlight-color: transparent; text-decoration: none; }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- 顶部吸顶：左右两张图片 -->
+  <div class="gate-header">
+    <div class="gate-header-left">
+      <img id="header-left-img" src="web顶部左边.png" alt="Header Left" onclick="toggleTheme()">
+    </div>
+    <div class="gate-header-right">
+      <img id="header-right-img" src="web顶部右边.png" alt="Header Right" onclick="toggleTheme()">
+    </div>
+  </div>
+
+  <!-- 页面内容（1200 宽度内） -->
+  <main class="gate-page">
+    <!-- 主题切换图片：深色 web_dark.png / 浅色 web_light.png -->
+    <section>
+      <img id="themeMain" src="web_light.png" alt="主题主图（浅色）">
+    </section>
+
+    <!-- 左对齐图片：深色 web_dark2.png / 浅色 web_light2.png（文件名为 web_lihgt2.png） -->
+    <section class="left-align">
+      <img id="themeSecondary" src="web_lihgt2.png" alt="主题次图（浅色）">
+    </section>
+
+    <!-- Banner图片：深色 web_banner_dark.png / 浅色 web_banner_light.png -->
+    <section style="margin: 50px 0;">
+      <img id="themeBanner" src="web_banner_light.png" alt="Banner图（浅色）">
+    </section>
+  </main>
+
+  <!-- 全宽区域（超出 1200 宽度），背景随主题变化 -->
+  <section class="full-bleed">
+    <div class="full-bleed-inner">
+      <img id="themeBottom" src="web_light_底部.png" alt="底部全宽图（浅色）">
+    </div>
+  </section>
+
+  <script>
+    (function(){
+      // 图片映射（注意：浅色第二张为 web_lihgt2.png 文件名）
+      const images = {
+        light: { main: 'web_light.png', secondary: 'web_lihgt2.png', banner: 'web_banner_light.png', bottom: 'web_light_底部.png' },
+        dark:  { main: 'web_dark.png',  secondary: 'web_dark2.png',   banner: 'web_banner_dark.png',  bottom: 'web_dark_底部.png' }
+      };
+
+      let theme = 'light';
+      const header = document.querySelector('.gate-header');
+      const themeMain = document.getElementById('themeMain');
+      const themeSecondary = document.getElementById('themeSecondary');
+      const themeBanner = document.getElementById('themeBanner');
+      const themeBottom = document.getElementById('themeBottom');
+
+      function applyNoDragAllImages(){
+        document.querySelectorAll('img').forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('dragstart', e => e.preventDefault(), { once: true });
+        });
+      }
+
+      function applyTheme(){
+        document.body.setAttribute('data-theme', theme);
+        const set = images[theme];
+        themeMain.src = set.main;
+        themeSecondary.src = set.secondary;
+        themeBanner.src = set.banner;
+        themeBottom.src = set.bottom;
+        themeMain.alt = theme === 'light' ? '主题主图（浅色）' : '主题主图（深色）';
+        themeSecondary.alt = theme === 'light' ? '主题次图（浅色）' : '主题次图（深色）';
+        themeBottom.alt = theme === 'light' ? '底部全宽图（浅色）' : '底部全宽图（深色）';
+      }
+
+      // 动态调整页面顶部间距
+      function adjustPagePadding() {
+        const header = document.querySelector('.gate-header');
+        const page = document.querySelector('.gate-page');
+        if (header && page) {
+          const headerHeight = header.offsetHeight;
+          page.style.paddingTop = headerHeight + 'px';
+        }
+      }
+
+      // 检测左右图片是否重叠，重叠时隐藏右侧图片
+      function checkImageOverlap() {
+        const leftImg = document.querySelector('.gate-header-left img');
+        const rightContainer = document.querySelector('.gate-header-right');
+        const rightImg = document.querySelector('.gate-header-right img');
+        
+        if (leftImg && rightImg && rightContainer) {
+          const leftRect = leftImg.getBoundingClientRect();
+          const rightRect = rightImg.getBoundingClientRect();
+          
+          // 检测是否重叠：左图片右边缘是否超过右图片左边缘
+          const isOverlapping = leftRect.right >= rightRect.left;
+          
+          if (isOverlapping) {
+            rightContainer.classList.add('hidden');
+          } else {
+            rightContainer.classList.remove('hidden');
+          }
+        }
+      }
+
+      window.toggleTheme = function(){
+        theme = (theme === 'light') ? 'dark' : 'light';
+        applyTheme();
+      };
+
+      window.addEventListener('message', function(event) {
+        const data = event.data;
+        const type = (typeof data === 'string') ? data : (data && data.type);
+        if (type === 'toggleTheme') {
+          window.toggleTheme();
+        } else if (type === 'setTheme:dark') {
+          theme = 'dark';
+          applyTheme();
+        } else if (type === 'setTheme:light') {
+          theme = 'light';
+          applyTheme();
+        }
+      });
+
+      // 初始应用
+      applyTheme();
+      applyNoDragAllImages();
+      try { window.parent && window.parent.postMessage({ type: 'GateThemeReady', theme }, '*'); } catch(_) {}
+
+      // 页面加载完成后执行
+      window.addEventListener('load', function() {
+        adjustPagePadding();
+        applyNoDragAllImages();
+        checkImageOverlap();
+      });
+
+      // 窗口大小改变时重新调整
+      window.addEventListener('resize', function() {
+        adjustPagePadding();
+        checkImageOverlap();
+      });
+    })();
+  </script>
+</body>
+</html>

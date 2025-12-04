@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>GATE APP 端演示</title>
+  <style>
+    :root {
+      --page-width: 375px; /* 保留变量但不再用于宽度适配 */
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000; /* 可选：便于在更宽屏幕上观察页面边界 */
+      overflow: hidden; /* 彻底禁用 body 滚动，由 .page 接管 */
+    }
+    
+    /* 隐藏 .page 的滚动条但保持滚动功能 */
+    .page {
+      /* 当视口宽高比超过 2:3 时，限制内容宽度为 2/3 * 视口高度，同时不超过 750px */
+      width: min(100vw, 750px, calc(100vh * 2 / 3));
+      height: 100%; /* 占满视口高度 */
+      margin: 0 auto; /* 大宽度下居中显示 */
+      position: relative;
+      overflow-y: auto; /* 开启内部滚动 */
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+      cursor: grab;
+    }
+    .page::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+      width: 0;
+      height: 0;
+    }
+    .page.dragging { cursor: grabbing; }
+    .main-image {
+      width: 100%;
+      height: calc(100vh + var(--footer-h, 0px));
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+    .main-image.dragging { cursor: grabbing; }
+
+    /* Banner 容器：绝对定位，随页面滚动并保持与 PNG 相对位置一致 */
+    .banner {
+      position: absolute; /* 相对于 .page 定位 */
+      left: 0; top: 0;
+      width: 0; height: 0; /* 由 JS 动态赋值 */
+      border: 3px solid #F2F3F4; /* 具体宽度与圆角由 JS 按比例更新 */
+      border-radius: 24px;
+      overflow: hidden;
+      z-index: 500; /* 在主图之上、吸底图之下 */
+      -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: pan-y; /* 保持纵向滚动，禁用水平的原生滚动，便于自定义水平滑动 */
+      background: transparent;
+    }
+    .banner-track {
+      display: flex;
+      height: 100%;
+      will-change: transform;
+      transition: transform 300ms ease;
+    }
+    .banner-slide {
+      flex: 0 0 100%;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+    }
+    .banner-slide img {
+      width: 100%; height: 100%;
+      object-fit: contain; /* 保持比例不失真 */
+      display: block;
+      -webkit-user-drag: none; /* 禁止 Safari 等浏览器的图片拖拽 */
+    }
+
+    /* 底部固定的吸底图片，始终固定在视口底部 */
+    .footer-toggle {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(100vw, 750px, calc(100vh * 2 / 3)); /* 与页面宽度一致并居中，受2:3比例限制 */
+      z-index: 1000;
+      display: block;
+      text-decoration: none;
+    }
+    .footer-toggle img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 主题下的Banner描边颜色 */
+    body[data-theme='light'] .banner { border-color: #F2F3F4; }
+    body[data-theme='dark'] .banner { border-color: #1F2023; }
+
+    /* 全站图片不可拖拽，统一与横幅一致的限制 */
+    img {
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+  </style>
+</head>
+  <body>
+    <div class="page">
+      <img id="mainImage" class="main-image" src="light.png" alt="主图（浅色）">
+      <!-- Banner 容器（位置与尺寸由 JS 按主图像素比例动态设置） -->
+      <div id="banner" class="banner" aria-label="可左右滑动的 Banner">
+        <div id="bannerTrack" class="banner-track"></div>
+      </div>
+    </div>
+
+  <a class="footer-toggle" href="#" id="toggleButton" aria-label="切换深浅色模式">
+    <img id="footerImage" src="light吸底.png" alt="吸底图片（浅色）">
+  </a>
+
+  <script>
+    (function() {
+      const images = {
+        light: { main: 'light.png', footer: 'light吸底.png' },
+        dark:  { main: 'dark.png',  footer: 'dark吸底.png' }
+      };
+
+      let theme = 'light';
+      const mainImage = document.getElementById('mainImage');
+      const footerImage = document.getElementById('footerImage');
+      const toggleButton = document.getElementById('toggleButton');
+      const page = document.querySelector('.page');
+      const banner = document.getElementById('banner');
+      const bannerTrack = document.getElementById('bannerTrack');
+
+      // Banner 图片资源（依据当前文件结构：dark 使用 b1-b6，light 使用 l1-l6）
+      const bannerSets = {
+        light: ['banner/l1.png','banner/l2.png','banner/l3.png','banner/l4.png','banner/l5.png','banner/l6.png'],
+        dark:  ['banner/b1.png','banner/b2.png','banner/b3.png','banner/b4.png','banner/b5.png','banner/b6.png']
+      };
+      let bannerIndex = 0;
+
+      // 根据吸底图的实际显示高度，设置 CSS 变量 --footer-h
+      // 用于把主图高度延伸到吸底图下方，避免底部黑色区域
+      function updateFooterHeightVar() {
+        const footerHeight = footerImage.clientHeight || 0;
+        document.documentElement.style.setProperty('--footer-h', footerHeight + 'px');
+      }
+
+      // 计算主图的 cover 缩放与居中裁剪偏移，基于 object-position: top center
+      function computeImageMapping() {
+        const cw = mainImage.clientWidth;  // 容器宽度（.page 宽度）
+        const ch = mainImage.clientHeight; // 容器高度（主图显示高度）
+        const nw = mainImage.naturalWidth || cw; // 原始宽度
+        const nh = mainImage.naturalHeight || ch; // 原始高度
+        const s = Math.max(cw / nw, ch / nh);     // cover 缩放比例
+        const dw = nw * s;                         // 显示后的图像宽度
+        // 顶部对齐，水平居中
+        const offsetLeft = (cw - dw) / 2;         // 图像相对容器左侧偏移
+        const offsetTop = 0;                      // 顶部对齐
+        return { s, offsetLeft, offsetTop, cw, ch, nw, nh };
+      }
+
+      // 按主图像素坐标更新 Banner 的位置与尺寸
+      function updateBannerLayout() {
+        if (!banner) return;
+        const { s, offsetLeft } = computeImageMapping();
+        // 需求坐标（相对于原始 PNG 像素）：left=48, top=813, size=498x741
+        const leftPx = offsetLeft + 48 * s;
+        const topPx  = 813 * s;
+        const bw     = 498 * s;
+        const bh     = 741 * s;
+        const br     = 24 * s;  // 圆角按比例缩放
+        const bwBorder = 3 * s; // 描边按比例缩放
+
+        banner.style.left = leftPx + 'px';
+        banner.style.top = topPx + 'px';
+        banner.style.width = bw + 'px';
+        banner.style.height = bh + 'px';
+        banner.style.borderRadius = br + 'px';
+        banner.style.borderWidth = bwBorder + 'px';
+      }
+
+      // 全站图片统一不可拖拽（与横幅行为一致）
+      function applyNoDragAllImages() {
+        const allImgs = document.querySelectorAll('img');
+        allImgs.forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('dragstart', e => e.preventDefault(), { once: true });
+        });
+      }
+
+      // 渲染 Banner 图片（按当前主题）- 支持无缝循环
+      function renderBannerImages() {
+        if (!bannerTrack) return;
+        bannerTrack.innerHTML = '';
+        const imgs = bannerSets[theme] || [];
+        
+        // 为无缝循环添加克隆图片：最后一张 + 原始图片 + 第一张
+        const allSlides = [];
+        if (imgs.length > 1) {
+          allSlides.push(imgs[imgs.length - 1]); // 克隆最后一张到开头
+        }
+        allSlides.push(...imgs); // 原始图片
+        if (imgs.length > 1) {
+          allSlides.push(imgs[0]); // 克隆第一张到末尾
+        }
+        
+        allSlides.forEach(src => {
+          const slide = document.createElement('div');
+          slide.className = 'banner-slide';
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = 'banner图片';
+          img.setAttribute('draggable', 'false'); // 禁止默认拖拽
+          img.addEventListener('dragstart', e => e.preventDefault());
+          slide.appendChild(img);
+          bannerTrack.appendChild(slide);
+        });
+        
+        // 初始位置设置为第一张真实图片（跳过克隆的最后一张）
+        bannerIndex = imgs.length > 1 ? 1 : 0;
+        bannerTrack.style.transform = `translateX(${-bannerIndex * 100}%)`;
+        bannerTrack.style.transition = 'transform 300ms ease';
+        updateBannerLayout();
+        applyNoDragAllImages();
+      }
+
+      // Banner 滑动交互（Pointer 事件统一）- 支持无缝循环
+      (function setupBannerSwipe(){
+        let dragging = false;
+        let startX = 0;
+        let lastDX = 0;
+
+        function slideCount(){ return bannerTrack ? bannerTrack.children.length : 0; }
+        function realSlideCount(){ 
+          const imgs = bannerSets[theme] || [];
+          return imgs.length;
+        }
+
+        function snapTo(index){
+          const count = slideCount();
+          const realCount = realSlideCount();
+          
+          bannerIndex = index;
+          bannerTrack.style.transition = 'transform 300ms ease';
+          bannerTrack.style.transform = `translateX(${-bannerIndex * 100}%)`;
+          
+          // 无缝循环处理：当动画结束后检查是否需要瞬间跳转到对应位置
+          if (realCount > 1) {
+            setTimeout(() => {
+              if (bannerIndex === 0) {
+                // 滑动到克隆的最后一张，瞬间跳转到真实的最后一张
+                bannerIndex = realCount;
+                bannerTrack.style.transition = 'none';
+                bannerTrack.style.transform = `translateX(${-bannerIndex * 100}%)`;
+              } else if (bannerIndex === count - 1) {
+                // 滑动到克隆的第一张，瞬间跳转到真实的第一张
+                bannerIndex = 1;
+                bannerTrack.style.transition = 'none';
+                bannerTrack.style.transform = `translateX(${-bannerIndex * 100}%)`;
+              }
+            }, 300); // 等待动画完成
+          }
+        }
+
+        banner.addEventListener('pointerdown', (e) => {
+          if (slideCount() <= 1) return;
+          dragging = true;
+          startX = e.clientX;
+          lastDX = 0;
+          bannerTrack.style.transition = 'none';
+          banner.setPointerCapture(e.pointerId);
+        });
+
+        banner.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          lastDX = dx;
+          const w = banner.clientWidth || 1;
+          const percent = (dx / w) * 100;
+          bannerTrack.style.transform = `translateX(${-(bannerIndex * 100) + percent}%)`;
+        });
+
+        function endDrag(){
+          if (!dragging) return;
+          dragging = false;
+          const w = banner.clientWidth || 1;
+          const threshold = Math.max(30, w * 0.15); // 至少30px或15%宽度
+          const count = slideCount();
+          
+          if (lastDX < -threshold) {
+            // 向右滑动
+            const nextIndex = bannerIndex + 1;
+            snapTo(nextIndex >= count ? count - 1 : nextIndex);
+          } else if (lastDX > threshold) {
+            // 向左滑动
+            const prevIndex = bannerIndex - 1;
+            snapTo(prevIndex < 0 ? 0 : prevIndex);
+          } else {
+            snapTo(bannerIndex);
+          }
+        }
+
+        banner.addEventListener('pointerup', endDrag);
+        banner.addEventListener('pointercancel', endDrag);
+        banner.addEventListener('pointerleave', endDrag);
+        // 彻底阻止元素上的默认拖拽
+        banner.addEventListener('dragstart', (e) => e.preventDefault());
+      })();
+      
+      (function setupPageDragScroll(){
+        let dragging = false;
+        let prevY = 0;
+        
+        // 确保获取到滚动容器
+        const scrollContainer = document.querySelector('.page');
+
+        mainImage.addEventListener('pointerdown', (e) => {
+          if (e.button !== 0) return;
+          // 不阻止默认行为，否则可能影响部分浏览器的滚动优化？
+          // 但为了自定义拖拽，通常需要 preventDefault 以防选中图片
+          e.preventDefault();
+          dragging = true;
+          prevY = e.clientY;
+          mainImage.classList.add('dragging');
+          document.body.style.userSelect = 'none';
+          try { mainImage.setPointerCapture(e.pointerId); } catch(_) {}
+        });
+        mainImage.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const dy = e.clientY - prevY;
+          prevY = e.clientY;
+          if (dy) {
+            // 直接修改容器的 scrollTop
+            scrollContainer.scrollTop -= dy;
+          }
+        });
+        function endDrag(e){
+          if (!dragging) return;
+          dragging = false;
+          mainImage.classList.remove('dragging');
+          document.body.style.userSelect = '';
+          try { mainImage.releasePointerCapture(e.pointerId); } catch(_) {}
+        }
+        mainImage.addEventListener('pointerup', endDrag);
+        mainImage.addEventListener('pointercancel', endDrag);
+        mainImage.addEventListener('pointerleave', endDrag);
+        mainImage.addEventListener('dragstart', (e) => e.preventDefault());
+      })();
+      
+      function applyTheme() {
+        mainImage.src = images[theme].main;
+        footerImage.src = images[theme].footer;
+        mainImage.alt = theme === 'light' ? '主图（浅色）' : '主图（深色）';
+        footerImage.alt = theme === 'light' ? '吸底图片（浅色）' : '吸底图片（深色）';
+        document.body.setAttribute('data-theme', theme);
+
+        // 当吸底图切换后，等待其加载完成再更新高度变量
+        if (footerImage.complete) {
+          updateFooterHeightVar();
+        } else {
+          footerImage.addEventListener('load', updateFooterHeightVar, { once: true });
+        }
+
+        // 渲染当前主题的 Banner 图片，并在主图加载后再精确定位
+        renderBannerImages();
+        if (mainImage.complete) {
+          updateBannerLayout();
+        } else {
+          mainImage.addEventListener('load', updateBannerLayout, { once: true });
+        }
+        // 统一应用图片不可拖拽
+        applyNoDragAllImages();
+      }
+
+      toggleButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.toggleAppTheme();
+      });
+
+      window.toggleAppTheme = function() {
+        theme = theme === 'light' ? 'dark' : 'light';
+        applyTheme();
+      };
+
+      window.addEventListener('message', function(event) {
+        const data = event.data;
+        const type = (typeof data === 'string') ? data : (data && data.type);
+        if (type === 'toggleTheme') {
+          window.toggleAppTheme();
+        } else if (type === 'setTheme:dark') {
+          theme = 'dark';
+          applyTheme();
+        } else if (type === 'setTheme:light') {
+          theme = 'light';
+          applyTheme();
+        }
+      });
+
+      // 默认初始化为 light，不再跟随系统偏好
+      applyTheme();
+
+      // 在窗口尺寸变化时同步更新（横竖屏切换或地址栏变化）
+      window.addEventListener('resize', () => {
+        updateFooterHeightVar();
+        updateBannerLayout();
+        applyNoDragAllImages();
+      });
+      // 首次加载时确保高度变量正确
+      if (footerImage.complete) {
+        updateFooterHeightVar();
+      } else {
+        footerImage.addEventListener('load', updateFooterHeightVar, { once: true });
+      }
+
+      // 主图加载后再计算 Banner 精确位置
+      if (mainImage.complete) {
+        updateBannerLayout();
+      } else {
+        mainImage.addEventListener('load', updateBannerLayout, { once: true });
+      }
+    })();
+  </script>
+</body>
+</html>
